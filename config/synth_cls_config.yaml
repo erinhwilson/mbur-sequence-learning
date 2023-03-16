@@ -1,0 +1,26 @@
+# Yaml config for synthetic motif classification
+
+folds: 5
+num_seqs:
+  #- 10000
+  #- 6000
+  - 2000
+
+seq_len:
+  - 300
+  - 150
+  - 50
+
+# model specifics
+models_to_try: 
+  - CNN_simple
+  - 2CNN
+  - 2CNN_pool
+
+# training params
+lr: 0.0001
+epochs: 5000 
+patience: 500
+
+# outputs
+out_dir: out_synth_cls

@@ -150,24 +150,21 @@ def stratified_partition(df, cpd,class_col='reg'):
 
 
 
-def build_dataloaders_single(train_df,
-                             test_df, 
-                             ds_specs,
-                             seq_col='seq',
-                             target_col="score",
-                             batch_size=128,
-                             split_frac=0.8,
-                             sampler=None,
-                             shuffle=True
-                            ):
+def build_dataloaders(train_df,
+                      test_df, 
+                      ds_specs,
+                      seq_col='seq',
+                      target_col="score",
+                      batch_size=128,
+                      split_frac=0.8,
+                      sampler=None,
+                      shuffle=True
+                      ):
     '''
-    Given a df, split into train and test, and encode the sequence for modeling 
+    Given train and test dfs, encode the sequence for modeling 
     based on the requested dataset types (eg OHE or Kmer counts). Load each 
     Dataset into a pytorch loaders. 
     '''
-    
-    # split
-    #train_df, test_df = u.quick_split(df,split_frac=split_frac)
     
     dls = {} # collect data loaders
     
@@ -430,8 +427,6 @@ def fit(epochs, model, loss_func, opt, train_dl, val_dl,device,
     estop = early_stopping.best_model_epoch
     best_val_score = early_stopping.val_loss_min 
 
-    print("fit checkpoint path:",chkpt_path)
-
     # load the last checkpoint with the best model
     if load_best:
         model.load_state_dict(torch.load(chkpt_path))
@@ -451,8 +446,6 @@ def run_model(train_dl,val_dl, model, loss_func, device,lr=0.01,
         optimizer = opt
     else: # if no opt provided, just use SGD
         optimizer = torch.optim.SGD(model.parameters(), lr=lr) 
-
-    print("runmodel checkpoint path:",chkpt_path)
     
     # run the training loop
     #train_losses, test_losses = fit(epochs, model, loss_func, optimizer, train_dl, test_dl, device)
@@ -502,7 +495,6 @@ def collect_model_stats(model_name,seq_len,
 
     # collect run time
     start_time = time.time()
-    print("collect checkpoint path:",chkpt_path)
     
     train_losses, \
     val_losses, \
@@ -831,7 +823,7 @@ def get_confusion_stats(model,model_name,seq_list,device,save_file=False,title=N
             plt.savefig(save_file)
 
     model.eval()
-    print(f"Running {model_name}")
+    print(f"Running predictions for {model_name}")
     
     mats = [] # conf matrices
     res_data = [] # classification results
