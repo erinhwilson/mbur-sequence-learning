@@ -264,6 +264,7 @@ def main():
                     )
                     p_res_df['model_type'] = model_type
                     p_res_df['ds_size'] = num_seqs
+                    p_res_df['seq_len'] = seq_len
                     p_res_df['fold'] = fold # which cv split
                     p_res_df['best_val_score'] = t_res['best_val_score']
                     p_res_df['epoch_stop'] = t_res['epoch_stop']

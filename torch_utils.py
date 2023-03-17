@@ -721,20 +721,22 @@ def quick_loss_plot(data_label_list,loss_str="MSE Loss",title="Train/test Loss",
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
     for i,((train_data,test_data),label,epoch_stop,best_val) in enumerate(data_label_list):
+        train_color_idx = 2*i+1 % len(colors) # wrap around again if needed
+        test_color_idx = 2*i % len(colors)
         # plot only 1 in every sparse_n points
         if sparse_n:
             train_data = [(i,x) for i,x in enumerate(train_data) if (i%sparse_n==0)]
             test_data = [(i,x) for i,x in enumerate(test_data) if (i%sparse_n==0)]
             
-            plt.plot(*zip(*train_data),linestyle='dashed',color=colors[2*i+1],linewidth=2.0, label=f"{label} Train")
-            plt.plot(*zip(*test_data),color=colors[2*i], label=f"{label} Test",linewidth=3.5)
+            plt.plot(*zip(*train_data),linestyle='dashed',color=colors[train_color_idx],linewidth=2.0, label=f"{label} Train")
+            plt.plot(*zip(*test_data),color=colors[test_color_idx], label=f"{label} Test",linewidth=3.5)
             
         else:
-            plt.plot(train_data,linestyle='dashed',color=colors[2*i+1],linewidth=2.0, label=f"{label} Train")
-            plt.plot(test_data,color=colors[2*i], label=f"{label} Test",linewidth=3.5)
+            plt.plot(train_data,linestyle='dashed',color=colors[train_color_idx],linewidth=2.0, label=f"{label} Train")
+            plt.plot(test_data,color=colors[test_color_idx], label=f"{label} Test",linewidth=3.5)
         
-        plt.axvline(x=epoch_stop,c=colors[2*i],linewidth=0.75,linestyle='dashed',label=f"{label} best test score")
-        plt.axhline(y=best_val,c=colors[2*i],linewidth=0.75,linestyle='dashed')
+        plt.axvline(x=epoch_stop,c=colors[test_color_idx],linewidth=0.75,linestyle='dashed',label=f"{label} best test score")
+        plt.axhline(y=best_val,c=colors[test_color_idx],linewidth=0.75,linestyle='dashed')
 
     plt.legend()
     plt.ylabel(loss_str)
