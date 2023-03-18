@@ -1,0 +1,35 @@
+# Yaml config for synthetic motif classification
+
+cvs: 
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+
+reductions:
+  - 0.005
+  - 0.025
+  - 0.25
+  - 1.0
+
+# model specifics
+models_to_try: 
+  - CNN
+  - biLSTM
+  - CNNLSTM
+
+seq_mode:
+  - regular
+  - shuffle
+
+locus_col: id
+target_col: growth_rate
+
+# training params
+lr: 0.0001
+epochs: 5000 
+patience: 500
+
+# outputs
+out_dir: out_mpra_reduction

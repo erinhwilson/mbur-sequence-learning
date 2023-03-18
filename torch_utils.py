@@ -11,6 +11,7 @@ import time
 import tqdm
 
 from sklearn.metrics import f1_score,precision_score,recall_score,accuracy_score,precision_recall_curve,matthews_corrcoef,r2_score
+from scipy.stats import pearsonr, spearmanr, gaussian_kde
 from sklearn.metrics import confusion_matrix,ConfusionMatrixDisplay,classification_report
 
 
@@ -859,3 +860,105 @@ def get_confusion_stats(model,model_name,seq_list,device,save_file=False,title=N
     
     return res_df
 
+
+def parity_pred_by_split(model,
+                         model_name,
+                         device,
+                         split_dfs,
+                         locus_col='locus_tag',
+                         seq_col='seq',
+                         target_col="score",
+                         splits=['train','val'],
+                         alpha=0.2,
+                         dense_color=True,
+                         save_file=None
+                        ):
+    '''
+    Given a trained model, get the model's predictions on each split
+    of the data and create parity plots of the y predictions vs actual ys
+    '''
+    # init subplots
+    fig, axs = plt.subplots(1,len(splits), sharex=True, sharey=True,figsize=(10,4))
+    #pred_dfs = {}
+    pred_res = [] # collect prediction results for dataFrame
+    
+    def parity_plot(title,ytrue,ypred,rigid=True):
+        '''
+        Individual parity plot for a specific split
+        '''
+        if dense_color:
+            # get color by point density kernel
+            # https://stackoverflow.com/questions/20105364/how-can-i-make-a-scatter-plot-colored-by-density-in-matplotlib
+            values = np.vstack([ytrue, ypred])
+            kernel = gaussian_kde(values)(values)
+
+            # Sort the points by density, so that the densest points are plotted last
+            idx = kernel.argsort()
+            ytrue, ypred, kernel = ytrue[idx], ypred[idx], kernel[idx]
+
+            axs[i].scatter(ytrue, ypred, c=kernel)
+        
+        else:
+            axs[i].scatter(ytrue, ypred, alpha=alpha)
+
+        r2 = r2_score(ytrue,ypred)
+        pr = pearsonr(ytrue,ypred)[0]
+        sp = spearmanr(ytrue,ypred).correlation
+
+        # y=x line
+        xpoints = ypoints = plt.xlim()
+        if rigid:
+            axs[i].set_ylim(min(xpoints),max(xpoints)) 
+        axs[i].plot(xpoints, ypoints, linestyle='--', color='k', lw=2, scalex=False, scaley=False)
+        axs[i].set_title(f"{title} (r2:{r2:.2f}|p:{pr:.2f}|sp:{sp:.2f})",fontsize=14)
+        axs[i].set_xlabel("Actual Score",fontsize=14)
+        axs[i].set_ylabel("Predicted Score",fontsize=14)
+
+        return r2, pr, sp
+    
+    for i,split in enumerate(splits):
+        print(f"{split} split")
+        df = split_dfs[split]
+        loci = df[locus_col].values
+        seqs = list(df[seq_col].values)        
+        ohe_seqs = torch.stack([torch.tensor(u.one_hot_encode(x)) for x in seqs]).to(device)
+        labels = torch.tensor(list(df[target_col].values)).unsqueeze(1)
+    
+    #dfs = {} # key: model name, value: parity_df
+    
+        # initialize prediction df with just locus col
+        pred_df = df[[locus_col]]
+        pred_df['truth'] = df[target_col]
+        print(f"Predicting for {model_name}")
+        
+        
+        # ask model to predict on seqs
+        preds = model(ohe_seqs.float()).tolist()
+        # preds is a tensor converted to a list, 
+        # single elements returned as a list, hence x[0]
+        pred_df['pred'] = [x[0] for x in preds]
+        
+        # do I want the result dfs? revise if so
+        #dfs[model_name] = pred_df
+        
+        # plot stuff
+        ytrue = pred_df['truth'].values
+        ypred = pred_df['pred'].values
+        
+        #plt.subplot(len(splits),i+1,1)
+        split_title = split
+        r2,pr,sp = parity_plot(split_title,ytrue,ypred,rigid=True)
+        
+        # save predictions
+        #pred_dfs[split] = pred_df
+        row = [model_name,split,r2,pr,sp]
+        pred_res.append(row)
+    
+    # show combined plot
+    plt.suptitle(model_name,fontsize=14)
+    plt.tight_layout()
+    plt.show()
+    if save_file:
+        plt.savefig(save_file)
+    
+    return pd.DataFrame(pred_res, columns=['model_name','split','r2','pearson','spearman'])
