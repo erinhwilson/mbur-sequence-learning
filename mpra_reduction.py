@@ -382,6 +382,7 @@ def main():
                     p_res_df['train_size'] = train_size
                     p_res_df['cv_fold'] = fold # which cv split
                     p_res_df['seq_mode'] = mode # regular or shuffled seq
+                    p_res_df['model_type'] = model_type
                     pred_file_name = f"{out_dir}/{model_name}_pred_res.tsv"
                     # save a temp copy of the results?
                     p_res_df.to_csv(pred_file_name,sep='\t',index=False)
