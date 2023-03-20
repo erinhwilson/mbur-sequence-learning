@@ -1,0 +1,8 @@
+source
+gene
+misc_feature
+repeat_region
+mobile_element
+misc_recomb
+misc_binding
+misc_RNA
