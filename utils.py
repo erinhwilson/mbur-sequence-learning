@@ -172,6 +172,10 @@ def count_kmers_in_seq(seq, mers):
     '''
     return [seq.count(mer) for mer in mers]
 
+def shuffle_seq(dna):
+    to_shuffle = list(dna)
+    random.shuffle(to_shuffle)
+    return  ''.join(to_shuffle)
 
 # +------------------------------+
 # | Data transformation functions |

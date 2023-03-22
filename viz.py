@@ -56,9 +56,9 @@ def view_train_test_dist(train_df,test_df,score_cols,id_col='locus_tag',val_df=N
     else:
         df = pd.concat([train_df,test_df])
     
-    df_melt = pd.melt(df, id_vars=[id_col,'set'],value_vars=score_cols,var_name='cond',value_name='tpm_lr')
+    df_melt = pd.melt(df, id_vars=[id_col,'set'],value_vars=score_cols,var_name='cond',value_name='seq_score')
     
-    sns.stripplot(data=df_melt,x='cond',y='tpm_lr',hue='set',dodge=True,alpha=0.2)
+    sns.stripplot(data=df_melt,x='cond',y='seq_score',hue='set',dodge=True,alpha=0.2)
     plt.title(f"Distribution")
     plt.show()
     

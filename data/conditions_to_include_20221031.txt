@@ -1,0 +1,17 @@
+uMax
+lowO2_fast_growth
+lowCH4
+MeOH
+NoCu
+medCu
+highCu
+lowCu
+highO2_slow_growth
+NO3_lowO2_slow_growth
+WithLanthanum
+NoLanthanum
+LanzaTech
+aa3_KO
+crotonic_acid
+CH4_500ppm
+CH4_1000ppm

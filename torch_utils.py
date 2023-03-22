@@ -227,15 +227,20 @@ def make_mt_skorch_dfs(df,seq_col='seq',target_cols=['highCu','noCu']):
 # | Classification group assignment functions |
 # +-------------------------------------------+
 
-def set_reg_class_up_down(df, col,thresh=1.0):
+def set_reg_class_up_down(df, col,thresh=1.0,thresh_lower=None):
     '''
     Given a dataframe of log ratio TPMS, add a column splitting genes into categories
-    * Below -thresh: class 0
-    * Between -thresh:thresh: class 1
+    * Below thresh_lower: class 0
+    * Between thresh_lower:thresh: class 1
     * Above thresh: class 2
     '''
+    # If no lower threshold is provided, set the lower to be the negative
+    # of the positive threshold
+    if not thresh_lower:
+        thresh_lower = -thresh
+        
     def get_class(val):
-        if val < -thresh:
+        if val < thresh_lower:
             return 0
         elif val > thresh:
             return 2
