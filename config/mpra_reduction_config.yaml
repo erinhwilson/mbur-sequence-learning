@@ -1,4 +1,4 @@
-# Yaml config for synthetic motif classification
+# Yaml config for cuperus MPRA reduction regression
 
 cvs: 
   - 0

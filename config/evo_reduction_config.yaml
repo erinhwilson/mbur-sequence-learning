@@ -1,0 +1,31 @@
+# Yaml config for evo reduction regression
+
+cvs: 
+  - 0
+
+reductions:
+  - 0.025
+  #- 0.25
+  #- 1.0
+
+# model specifics
+models_to_try: 
+  - CNN
+  #- biLSTM
+  #- CNNLSTM
+
+seq_mode:
+  - regular
+  - shuffle
+
+locus_col: og_index
+target_col: expression
+seq_col: seq
+
+# training params
+lr: 0.0001
+epochs: 500
+patience: 50
+
+# outputs
+out_dir: out_evo_reduction
