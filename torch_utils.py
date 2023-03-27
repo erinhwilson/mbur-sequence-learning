@@ -876,7 +876,8 @@ def parity_pred_by_split(model,
                          splits=['train','val'],
                          alpha=0.2,
                          dense_color=True,
-                         save_file=None
+                         save_file=None,
+                         save_test_preds=None, # give this a filename to save test prediction file
                         ):
     '''
     Given a trained model, get the model's predictions on each split
@@ -945,6 +946,12 @@ def parity_pred_by_split(model,
         
         # do I want the result dfs? revise if so
         #dfs[model_name] = pred_df
+
+        # for now, save the test split pred_df
+        if split == 'test' and save_test_preds:
+            pred_df.to_csv(save_test_preds,sep='\t',index=False)
+            print(f"Saved test predictions to {save_test_preds}")
+
         
         # plot stuff
         ytrue = pred_df['truth'].values

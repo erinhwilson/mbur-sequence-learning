@@ -210,7 +210,8 @@ def main():
                         seq_col=seq_col,
                         target_col=target_col,
                         splits=splits_to_plot,
-                        save_file=f"{out_dir}/{model_name}_parity_plot.png"
+                        save_file=f"{out_dir}/{model_name}_parity_plot.png",
+                        save_test_preds=f"{out_dir}/{model_name}_test_preds.tsv"
                     )
                     p_res_df['reduction'] = r
                     p_res_df['train_size'] = train_size
@@ -221,6 +222,13 @@ def main():
                     # save a temp copy of the results?
                     p_res_df.to_csv(pred_file_name,sep='\t',index=False)
                     
+                    # Save the models if requested
+                    if config['save_model']:
+                        opt = t_res['opt']
+
+                        torch.save(model.state_dict(),f'{out_dir}/{model_name}_model_state_dict.pt')
+                        torch.save(opt.state_dict(),f'{out_dir}/{model_name}_opt_state_dict.pt')
+                        
                     #pred_res[model_name] = p_res_df
                     print(f"Finished {model_name}\n")
 

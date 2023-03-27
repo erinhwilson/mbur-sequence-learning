@@ -24,8 +24,9 @@ seq_col: seq
 
 # training params
 lr: 0.0001
-epochs: 500
-patience: 50
+epochs: 1000
+patience: 100
 
 # outputs
 out_dir: out_evo_reduction
+save_model: True
