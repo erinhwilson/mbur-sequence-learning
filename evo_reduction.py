@@ -108,9 +108,9 @@ def quick_model_setup(model_type,input_size):
 def main():
     set_seed()
 
-    # load pre-split data
+    # load data
     filename = 'data/defined_media_traning_data_0.05sample.txt'
-    df = pd.read_csv('data/defined_media_traning_data_0.05sample.txt',sep='\t')
+    df = pd.read_csv(filename,sep='\t')
 
     # +----------------------------------------------+
     config_file = 'config/evo_reduction_config.yaml'
