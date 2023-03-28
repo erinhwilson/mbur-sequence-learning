@@ -84,7 +84,15 @@ def quick_model_setup(model_type,input_size):
     if model_type == 'CNN':
         model = m.DNA_2CNN_2FC(
             input_size,
-            1, # num tasks
+            num_classes=1, # num tasks
+            num_filters1=32,
+            num_filters2=32,
+            kernel_size1=10,
+            kernel_size2=6,
+            conv_pool_size1=2,
+            fc_node_num1=50,
+            fc_node_num2=50,
+            dropout1=0.25
         )
     elif model_type == 'biLSTM':
         model = m.DNA_biLSTM(
