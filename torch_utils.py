@@ -887,6 +887,8 @@ def parity_pred_by_split(model,
     fig, axs = plt.subplots(1,len(splits), sharex=True, sharey=True,figsize=(10,4))
     #pred_dfs = {}
     pred_res = [] # collect prediction results for dataFrame
+
+    model.eval()
     
     def parity_plot(title,ytrue,ypred,rigid=True):
         '''
@@ -937,9 +939,18 @@ def parity_pred_by_split(model,
         pred_df['truth'] = df[target_col]
         print(f"Predicting for {model_name}")
         
-        
+        # PUT THESE IN BATCHES??
+        split_ds = SeqDatasetOHE(df,seq_col=seq_col,target_col=target_col)
+        split_dl = DataLoader(split_ds, batch_size=128) # why was *2 ever used?
+
+        preds = []
+        for xb, yb in split_dl:
+            xb, yb = xb.to(device),yb.to(device)
+            batch_preds = model(xb.float()).tolist()
+            preds += batch_preds
+
         # ask model to predict on seqs
-        preds = model(ohe_seqs.float()).tolist()
+        #preds = model(ohe_seqs.float()).tolist()
         # preds is a tensor converted to a list, 
         # single elements returned as a list, hence x[0]
         pred_df['pred'] = [x[0] for x in preds]
