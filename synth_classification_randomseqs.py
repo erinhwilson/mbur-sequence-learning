@@ -39,7 +39,8 @@ def set_seed(seed: int = 42) -> None:
     #os.environ["PYTHONHASHSEED"] = str(seed)
     print(f"Random seed set as {seed}")
 
-
+UP_MOTIF = 'TATATA'
+DOWN_MOTIF = 'GCGCGC'
 def synthetic_score(seq):
     '''
     Given a DNA sequence, return a simple synthetic score based on
@@ -53,9 +54,9 @@ def synthetic_score(seq):
     }
 
     score = np.mean([score_dict[base] for base in seq])
-    if 'TATATA' in seq:
+    if UP_MOTIF in seq:
         score += 10
-    if 'GCGCGC' in seq:
+    if DOWN_MOTIF in seq:
         score -= 10
     return score
 
@@ -120,6 +121,77 @@ def make_random_seq_dataset(num_seqs, seq_len):
         syn_seqs.append((i,my_seq))
 
     syn_df = pd.DataFrame(syn_seqs,columns=['id','seq'])
+    return syn_df
+
+def make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, m1, m2, proportion):
+    '''
+    Given a number of sequences to make and a sequence length,
+    return a dataframe of randomly generated sequences. 
+    Also, make sure two specific motifs are represented at at least 
+    a certain proportion of the samples.
+    '''
+    print(f"Making {num_seqs} seq dataset of {seq_len}bp with balanced motifs")
+    syn_seqs = []
+    m1_seqs = []
+    m2_seqs = []
+    
+    m1_enough = False
+    m2_enough = False
+    m1_prop = 0 # proportion of samples with motif 1
+    m2_prop = 0 # proportion of samples with motif 2
+
+    i = 0
+
+    while not (m1_enough and m2_enough):
+        my_seq = ''.join(np.random.choice(('C','G','T','A'), seq_len))
+        if m1 in my_seq and m2 in my_seq:
+            # skip doubles for now
+            pass
+
+        elif m1 in my_seq:
+            m1_seqs.append((i,my_seq))
+            i+=1
+
+            m1_prop = len(m1_seqs)/num_seqs
+            if m1_prop > proportion:
+                m1_enough = True
+
+        elif m2 in my_seq:
+            m2_seqs.append((i,my_seq))
+            i+=1
+
+            m2_prop = len(m2_seqs)/num_seqs
+            if m2_prop > proportion:
+                m2_enough = True
+
+        else:
+            syn_seqs.append((i,my_seq))
+            i+=1
+
+    # Once we're out of this loop, check if we have enough total sequences
+    total_seqs = len(syn_seqs) + len(m1_seqs) + len(m2_seqs)
+
+    # If too many, downsample the syn_seqs without motifs
+    if total_seqs > num_seqs:
+        overlow = total_seqs - num_seqs
+        num_to_keep = len(syn_seqs) - overlow
+        syn_seqs = u.downselect_list(syn_seqs,num_to_keep)
+
+    # If not enough, make some more syn_seqs to fill the gap
+    elif total_seqs < num_seqs:
+        num_seqs_needed = num_seqs - total_seqs
+        for j in range(j,j+num_seqs_needed):
+            my_seq = ''.join(np.random.choice(('C','G','T','A'), seq_len))
+            syn_seqs.append((j,my_seq))
+
+    else:
+        print("Wow. What a magical coincidence that we have exactly the number of seqs needed!")
+
+    # shuffle it all up for good measure
+    all_seqs = m1_seqs + m2_seqs + syn_seqs
+    random.shuffle(all_seqs)
+
+    syn_df = pd.DataFrame(all_seqs,columns=['id','seq'])
     return syn_df
 
 def load_train_test_splits(train_df,test_df,seq_col,target_col):
@@ -200,9 +272,13 @@ def main():
     for num_seqs in config['num_seqs']:
         for seq_len in config['seq_len']:
             # create synthetic dataset and add custom labels
-            syn_df = make_random_seq_dataset(num_seqs, seq_len)
+            #syn_df = make_random_seq_dataset(num_seqs, seq_len)
+            syn_df = make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, UP_MOTIF,DOWN_MOTIF,0.05)
             syn_df['score'] = syn_df['seq'].apply(lambda x: synthetic_score(x))
             tu.set_reg_class_up_down(syn_df,'score',thresh=5)
+            print("__ SynDF Value Counts__")
+            print(syn_df.value_counts('score_reg_UD'))
+            print("____________________")
 
             target_col = 'score_reg_UD'
             seq_col = 'seq'
