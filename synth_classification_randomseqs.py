@@ -98,7 +98,7 @@ def quick_model_setup(model_type,input_size):
             num_filters2=8,
             kernel_size1=6,
             kernel_size2=6,
-            conv_pool_size1=3,
+            conv_pool_size1=2,
             fc_node_num1=10,
             fc_node_num2=10,
         )
@@ -180,7 +180,7 @@ def make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, m1, m2, proportion)
     # If not enough, make some more syn_seqs to fill the gap
     elif total_seqs < num_seqs:
         num_seqs_needed = num_seqs - total_seqs
-        for j in range(j,j+num_seqs_needed):
+        for j in range(i,i+num_seqs_needed):
             my_seq = ''.join(np.random.choice(('C','G','T','A'), seq_len))
             syn_seqs.append((j,my_seq))
 
@@ -273,7 +273,8 @@ def main():
         for seq_len in config['seq_len']:
             # create synthetic dataset and add custom labels
             #syn_df = make_random_seq_dataset(num_seqs, seq_len)
-            syn_df = make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, UP_MOTIF,DOWN_MOTIF,0.05)
+            minority_balance = 0.01
+            syn_df = make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, UP_MOTIF,DOWN_MOTIF,minority_balance)
             syn_df['score'] = syn_df['seq'].apply(lambda x: synthetic_score(x))
             tu.set_reg_class_up_down(syn_df,'score',thresh=5)
             print("__ SynDF Value Counts__")
