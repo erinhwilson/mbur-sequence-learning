@@ -331,7 +331,7 @@ def main():
                         opt=torch.optim.Adam,
                         model=model,
                         loss_type='classification',
-                        chkpt_path=f"checkpoint_{config['minority_balance'].pt}"
+                        chkpt_path=f"checkpoint_{config['minority_balance']}.pt"
 
                     )
                     tu.quick_loss_plot(
