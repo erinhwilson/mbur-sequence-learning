@@ -173,7 +173,7 @@ def make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, m1, m2, proportion)
 
     # If too many, downsample the syn_seqs without motifs
     if total_seqs > num_seqs:
-        print(f"downsampling {len(total_seqs)} randomseqs to {num_seqs}")
+        print(f"downsampling {total_seqs} randomseqs to {num_seqs}")
         overlow = total_seqs - num_seqs
         num_to_keep = len(syn_seqs) - overlow
         syn_seqs = u.downselect_list(syn_seqs,num_to_keep)
@@ -287,7 +287,10 @@ def main():
             syn_df['score'] = syn_df['seq'].apply(lambda x: synthetic_score(x))
             tu.set_reg_class_up_down(syn_df,'score',thresh=5)
             print("__ SynDF Value Counts__")
-            print(syn_df.value_counts('score_reg_UD'))
+            counts = syn_df.value_counts('score_reg_UD')
+            print(counts)
+            print("0:", counts[0]/num_seqs)
+            print("2:", counts[2]/num_seqs)
             print("____________________")
 
             target_col = 'score_reg_UD'
