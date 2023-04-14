@@ -173,6 +173,7 @@ def make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, m1, m2, proportion)
 
     # If too many, downsample the syn_seqs without motifs
     if total_seqs > num_seqs:
+        print(f"downsampling {len(total_seqs)} randomseqs to {num_seqs}")
         overlow = total_seqs - num_seqs
         num_to_keep = len(syn_seqs) - overlow
         syn_seqs = u.downselect_list(syn_seqs,num_to_keep)
@@ -180,9 +181,17 @@ def make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, m1, m2, proportion)
     # If not enough, make some more syn_seqs to fill the gap
     elif total_seqs < num_seqs:
         num_seqs_needed = num_seqs - total_seqs
-        for j in range(i,i+num_seqs_needed):
+        print(f"backfilling {num_seqs_needed} up to {num_seqs}")
+        #for j in range(i,i+num_seqs_needed):
+        while i < num_seqs_needed:
             my_seq = ''.join(np.random.choice(('C','G','T','A'), seq_len))
-            syn_seqs.append((j,my_seq))
+            # to preserve the intended motif balance, don't backfill sequences with 
+            # M1 or M2
+            if (m1 in my_seq) or (m2 in my_seq):
+                pass
+            else:
+                syn_seqs.append((i,my_seq))
+                i += 1
 
     else:
         print("Wow. What a magical coincidence that we have exactly the number of seqs needed!")
@@ -273,7 +282,7 @@ def main():
         for seq_len in config['seq_len']:
             # create synthetic dataset and add custom labels
             #syn_df = make_random_seq_dataset(num_seqs, seq_len)
-            minority_balance = 0.01
+            minority_balance = config['minority_balance']
             syn_df = make_random_seq_dataset_with_2_motifs(num_seqs, seq_len, UP_MOTIF,DOWN_MOTIF,minority_balance)
             syn_df['score'] = syn_df['seq'].apply(lambda x: synthetic_score(x))
             tu.set_reg_class_up_down(syn_df,'score',thresh=5)
